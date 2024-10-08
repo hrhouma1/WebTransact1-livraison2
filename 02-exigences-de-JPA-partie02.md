@@ -1,16 +1,28 @@
+
 --------------------------------------------
-# **Projet de Gestion des Clients et Cartes Bancaires** 🚀
+# **Projet de Gestion des Clients et Cartes Bancaires** 💳💼💻✨🚀
 --------------------------------------------
 
-- Ce document vous guide de façon **exhaustive** à travers toutes les étapes nécessaires pour configurer, développer et tester une application Spring Boot avec JPA et PostgreSQL. 
 
-## Annexe 1 - **Résumé des Commandes Maven** 🛠️  
+**💡 Ce document vous guide de façon 📝 **exhaustive** à travers toutes les étapes nécessaires pour 🚀 configurer, 🛠️ développer et 🧪 tester une application Spring Boot avec JPA et PostgreSQL. 💻🐘**
+
+
+----------------
+# Annexe 1 - **Résumé des Commandes Maven** 🛠️  
+----------------
+
 Un tableau récapitulatif des principales commandes Maven, incluant la combinaison de commandes pour une exécution efficace du projet.
 
-## Annexe 2 - **Détails des Types et Relations JPA** 📚  
+----------------
+# Annexe 2 - **Détails des Types et Relations JPA** 📚  
+----------------
+
 Explication détaillée des types de données utilisés dans JPA, comme le rôle de `Long` en tant que type de clé primaire dans les entités, et les implications sur la gestion des relations entre entités.
 
-## Annexe 3 - **Guide des Relations JPA : `JoinColumn` et `mappedBy`** 🔄  
+----------------
+# Annexe 3 - **Guide des Relations JPA : `JoinColumn` et `mappedBy`** 🔄  
+----------------
+
 Une analyse approfondie de l’utilisation des annotations `@JoinColumn` et `mappedBy` dans les relations entre entités, avec exemples concrets pour bien comprendre la structure des clés étrangères.
 
 
