@@ -386,11 +386,10 @@ class CustomerServiceTest {
 [Retour en haut](#table-des-matieres)
 
 ---
+# Annexe 1 - **Résumé des Commandes Maven** 🛠️  
+--------------------------------
 
-# Annexe 1 
-
-
-Voici une table résumant quelques commandes Maven importantes, y compris la combinaison que tu souhaites utiliser (`mvn clean install -DskipTests spring-boot:run`).
+### ==> Table résumant quelques commandes Maven importantes, y compris cette combinaison magique (`mvn clean install -DskipTests spring-boot:run`).
 
 | **Commande**                                         | **Description**                                                                                   |
 |------------------------------------------------------|---------------------------------------------------------------------------------------------------|
@@ -408,8 +407,70 @@ Voici une table résumant quelques commandes Maven importantes, y compris la com
 
 En combinant **`mvn clean install -DskipTests spring-boot:run`**, tu effectues le processus d'installation sans les tests puis tu lances l'application Spring Boot.
 
+--------------------------------
+# Autres commandes: 
+--------------------------------
 
-# Annexe 2
+- Version étendue avec au moins 30 commandes Maven, incluant des commandes pour la compilation, les tests, l'intégration, le déploiement, et d'autres aspects du cycle de vie d'un projet Maven :
+
+| **Commande**                                         | **Description**                                                                                   |
+|------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| `mvn clean`                                          | Nettoie le répertoire `target` des fichiers générés dans les builds précédents.                    |
+| `mvn compile`                                        | Compile le code source de ton projet.                                                             |
+| `mvn test`                                           | Exécute les tests unitaires configurés dans le projet.                                             |
+| `mvn package`                                        | Emballe le projet dans un fichier JAR ou WAR.                                                      |
+| `mvn install`                                        | Installe le package dans le repository Maven local pour une utilisation par d'autres projets.      |
+| `mvn clean install`                                  | Nettoie, compile, teste et emballe l'application, puis installe le package localement.             |
+| `mvn clean install -DskipTests`                      | Fait tout le processus d'installation sans exécuter les tests unitaires.                           |
+| `mvn spring-boot:run`                                | Démarre l'application Spring Boot directement depuis le code source.                               |
+| **`mvn clean install -DskipTests spring-boot:run`**  | Nettoie, compile, emballe l'application sans exécuter les tests, puis la démarre.                  |
+| `mvn spring-boot:build-image`                        | Crée une image Docker pour l'application Spring Boot.                                              |
+| `mvn deploy`                                         | Déploie le package sur un dépôt Maven distant.                                                     |
+| `mvn verify`                                         | Vérifie que l'application respecte les exigences de qualité, y compris les tests d'intégration.    |
+| `mvn site`                                           | Génère un rapport de site pour le projet, y compris des informations sur les tests et la qualité.  |
+| `mvn cobertura:cobertura`                            | Exécute des rapports de couverture de code pour évaluer les tests.                                 |
+| `mvn sonar:sonar`                                    | Envoie les résultats d'analyse de code vers SonarQube pour une revue de la qualité du code.        |
+| `mvn scm:checkin`                                    | Enregistre et pousse les modifications dans un système de gestion de code source (SCM).            |
+| `mvn release:prepare`                                | Prépare une version pour être déployée en production, incluant le taggage et le versionnement.      |
+| `mvn release:perform`                                | Exécute le processus de release, incluant la publication dans un dépôt distant.                    |
+| `mvn clean verify`                                   | Combine les étapes de nettoyage, compilation, tests, et vérification de la qualité.                |
+| `mvn dependency:tree`                                | Affiche l'arbre de dépendances du projet.                                                          |
+| `mvn versions:display-dependency-updates`            | Affiche les mises à jour disponibles pour les dépendances Maven.                                   |
+| `mvn versions:display-plugin-updates`                | Affiche les mises à jour disponibles pour les plugins Maven.                                       |
+| `mvn help:effective-pom`                             | Affiche le POM effectif après résolution des héritages et dépendances.                             |
+| `mvn dependency:analyze`                             | Analyse les dépendances utilisées et suggère des suppressions si nécessaire.                       |
+| `mvn archetype:generate`                             | Génère un projet Maven à partir d'un archétype prédéfini.                                          |
+| `mvn exec:java`                                      | Exécute une classe Java dans le projet.                                                            |
+| `mvn jar:jar`                                        | Génère un fichier JAR à partir des classes compilées.                                              |
+| `mvn war:war`                                        | Génère un fichier WAR à partir du projet.                                                          |
+| `mvn assembly:single`                                | Crée un fichier exécutable JAR avec toutes les dépendances embarquées.                             |
+| `mvn dependency:purge-local-repository`              | Supprime les dépendances du dépôt local pour les télécharger à nouveau.                            |
+| `mvn tomcat7:run`                                    | Lance une instance Tomcat pour exécuter une application web localement.                            |
+| `mvn dockerfile:build`                               | Construit une image Docker à partir d'un Dockerfile dans le projet.                                |
+| `mvn jetty:run`                                      | Démarre un serveur Jetty pour tester une application web localement.                               |
+| `mvn cargo:run`                                      | Utilise Cargo pour déployer une application sur un serveur applicatif.                             |
+| `mvn gpg:sign-and-deploy-file`                       | Signe et déploie un fichier dans un dépôt Maven distant.                                           |
+| `mvn javadoc:javadoc`                                | Génère la documentation Javadoc pour le projet.                                                    |
+| `mvn compiler:compile`                               | Compile les fichiers source.                                                                      |
+| `mvn test-compile`                                   | Compile les tests sans exécuter les tests unitaires.                                               |
+| `mvn dependency:resolve`                             | Résout et télécharge les dépendances du projet.                                                    |
+| `mvn release:rollback`                               | Annule une release et revient à l'état précédent du projet.                                        |
+
+
+--------------------------------
+# Commande importante :
+--------------------------------
+
+| **Commande**                 | **Description**                                                                                   |
+|------------------------------|---------------------------------------------------------------------------------------------------|
+| `mvn dependency:tree`         | Affiche l'arbre des dépendances du projet, y compris les dépendances transitives.                 |
+
+Elle est souvent utilisée pour diagnostiquer des conflits de dépendances ou vérifier les dépendances transitives dans un projet Maven.
+
+Si tu recherches des informations sur la structure des dépendances, c'est bien la commande **`mvn dependency:tree`** qu'il te faut.
+
+
+# Annexe 2 - **Détails des Types et Relations JPA** 📚  
 
 
 Dans l'interface `JpaRepository<Customer, Long>`, le second paramètre, `Long`, représente le **type de l'identifiant** (ID) de l'entité `Customer`. Voici une explication plus détaillée :
@@ -436,9 +497,8 @@ Ainsi, dans `JpaRepository<Customer, Long>`, `Long` fait référence au type de 
 
 Si votre ID avait été un autre type (comme `UUID` ou `Integer`), vous auriez mis ce type à la place de `Long`.
 
-# Annexe 3 
+# Annexe 3 - **Guide des Relations JPA : `JoinColumn` et `mappedBy`** 🔄  
 
-Voici une manière de formuler une question par rapport à cela :
 
 **Question :**
 
@@ -482,7 +542,7 @@ Dans cet exemple, c'est `Employe` qui contient la clé étrangère vers `Departe
 - **Si tu veux contrôler où la clé étrangère est stockée**, utilise `@JoinColumn` du côté qui possède la relation.
 - **Si tu veux simplement naviguer dans la relation**, sans créer une nouvelle colonne, utilise `mappedBy`.
 
-Donc, tu peux effectivement définir la relation d'une part ou d'une autre, tant que tu respectes cette logique de propriétaire et de côté inverse.
+Donc, tu peux  définir la relation d'une part ou d'une autre, tant que tu respectes cette logique de propriétaire et de côté inverse.
 
 
 
