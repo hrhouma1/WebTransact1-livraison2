@@ -1,20 +1,21 @@
 # 🎯 **Cap sur JPA : La Gestion de Données en Mode Automatique !** 🚀
+
 ## **Un voyage pas à pas vers la gestion des données avec JPA et Spring Boot** 📚
 
 ---
 
 ## 🗂️ **Table des Matières** :
 
-1. [Partie 1 : Exigences Générales JPA](#partie-1--exigences-générales-jpa-)
-2. [Partie 2 : Projet de Gestion des Clients et Cartes](#partie-2--projet-de-gestion-des-clients-et-cartes-)
-3. [Structure du Projet](#structure-du-projet-)
-4. [Configuration de la Base de Données](#configuration-de-la-base-de-données-)
-5. [Modèles et Relations JPA](#modèles-et-relations-jpa-)
-6. [Repositories](#repositories-)
-7. [Services et Logique Métier](#services-et-logique-métier-)
-8. [Contrôleurs](#contrôleurs-)
-9. [Contraintes d'Intégrité](#contraintes-dintégrité-)
-10. [Tests et Validation](#tests-et-validation-)
+1. [Partie 1 : Exigences Générales JPA](#partie-1-exigences-generales-jpa)
+2. [Partie 2 : Projet de Gestion des Clients et Cartes](#partie-2-projet-de-gestion-des-clients-et-cartes)
+3. [Structure du Projet](#structure-du-projet)
+4. [Configuration de la Base de Données](#configuration-de-la-base-de-donnees)
+5. [Modèles et Relations JPA](#modeles-et-relations-jpa)
+6. [Repositories](#repositories)
+7. [Services et Logique Métier](#services-et-logique-metier)
+8. [Contrôleurs](#controleurs)
+9. [Contraintes d'Intégrité](#contraintes-dintegrite)
+10. [Tests et Validation](#tests-et-validation)
 
 ---
 
@@ -261,4 +262,3 @@ class CustomerServiceTest {
     }
 }
 ```
-
