@@ -1,4 +1,6 @@
+-----------------------------
 # Étapes 
+-----------------------------
 
 1. Je commence par le **pom.xml**.
 2. Je vérifie le fichier **application.properties** :
@@ -42,7 +44,9 @@ Points Clés :
 Ces modifications devraient résoudre l'erreur et permettre à votre contrôleur et service de fonctionner correctement ensemble.
 ```
 
+-----------------------------
 # **Annexe 1 - Retravailler le modèle Card**
+-----------------------------
 
 ### Ancienne version :
 
@@ -129,7 +133,9 @@ Changements et explications :
 6. Changement du type de `createDt` de `String` à `LocalDate` pour une meilleure gestion des dates.
 7. Ajout de l'annotation **@Builder** de **Lombok** pour permettre la création d'instances avec un pattern builder.
 
+-----------------------------
 # **Annexe 2 - Retravailler le modèle Customer**
+-----------------------------
 
 ### Ancienne version :
 
@@ -234,7 +240,9 @@ Changements et explications :
 4. Ajout de la relation `@OneToMany` avec **Card**.
 5. Ajout de méthodes utilitaires **addCard** et **removeCard** pour gérer la relation bidirectionnelle avec **Card**.
 
+-----------------------------
 # **Annexe 3 - Retravailler les contrôleurs**
+-----------------------------
 
 ### Nouvelle version de **CardController** et **CustomerController** :
 
