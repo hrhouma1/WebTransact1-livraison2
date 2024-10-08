@@ -4,7 +4,7 @@
 --------------------------------------------
 
 
-**💡 Ce document vous guide de façon 📝 **exhaustive** à travers toutes les étapes nécessaires pour 🚀 configurer, 🛠️ développer et 🧪 tester une application Spring Boot avec JPA et PostgreSQL. 💻🐘**
+*💡 Ce document vous guide de façon 📝 **exhaustive** à travers toutes les étapes nécessaires pour 🚀 configurer, 🛠️ développer et 🧪 tester une application Spring Boot avec JPA et PostgreSQL. 💻🐘*
 
 
 ----------------
