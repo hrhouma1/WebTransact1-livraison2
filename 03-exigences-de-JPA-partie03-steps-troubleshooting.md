@@ -399,3 +399,587 @@ public class CustomerController {
 }
 ```
 
+
+---------------------------------
+# Anciennes versions
+---------------------------------
+
+Les versions **anciennes** de vos contrôleurs géraient toute la logique au niveau du contrôleur, avec une dépendance directe entre `CustomerController` et `CardController`, et utilisaient des listes en mémoire pour stocker les entités au lieu de faire appel à une base de données.
+
+La nouvelle version, en revanche, introduit des services et des repositories JPA pour gérer la persistance des données, ce qui améliore l'architecture de l'application en séparant les préoccupations et en permettant une interaction facile avec une base de données relationnelle.
+
+#  comparaison entre les deux **anciens** contrôleurs (CardController et CustomerController) avec les services mis en place pour améliorer l'application.
+
+# **ANCIEN 1 : CardController**
+
+```java
+package com.example.demo.controller;
+
+import com.example.demo.model.Card;
+import com.example.demo.model.Customer;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.context.annotation.Lazy;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/v1/cards")
+@Tag(name = "Card", description = "API pour la gestion des cartes bancaires")
+public class CardController {
+
+    private List<Card> cards = new ArrayList<>();
+    private final CustomerController customerController;
+
+    public CardController(@Lazy CustomerController customerController) {
+        this.customerController = customerController;
+    }
+
+    @Operation(summary = "Ajouter une nouvelle carte", description = "Ajoute une nouvelle carte bancaire pour un client existant")
+    @ApiResponse(responseCode = "200", description = "Carte ajoutée avec succès", content = @Content(schema = @Schema(implementation = Card.class)))
+    @ApiResponse(responseCode = "400", description = "Données invalides ou client inexistant")
+    @PostMapping
+    public ResponseEntity<?> addCard(@RequestBody Card card) {
+        if (cards.stream().anyMatch(c -> c.getCardId() == card.getCardId())) {
+            return ResponseEntity.badRequest().body("Une carte avec cet ID existe déjà.");
+        }
+        if (customerController.getCustomers().stream().noneMatch(c -> c.getCustomerId() == card.getCustomerId())) {
+            return ResponseEntity.badRequest().body("Le client correspondant n'existe pas.");
+        }
+        cards.add(card);
+        return ResponseEntity.ok(card);
+    }
+
+    @Operation(summary = "Obtenir toutes les cartes", description = "Récupère la liste de toutes les cartes bancaires")
+    @ApiResponse(responseCode = "200", description = "Liste des cartes récupérée avec succès")
+    @GetMapping
+    public List<Card> getAllCards() {
+        return cards;
+    }
+
+    @Operation(summary = "Obtenir une carte par ID", description = "Récupère les détails d'une carte bancaire spécifique")
+    @ApiResponse(responseCode = "200", description = "Carte trouvée", content = @Content(schema = @Schema(implementation = Card.class)))
+    @ApiResponse(responseCode = "404", description = "Carte non trouvée")
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCardById(@Parameter(description = "ID de la carte") @PathVariable int id) {
+        Card card = cards.stream()
+                    .filter(c -> c.getCardId() == id)
+                    .findFirst()
+                    .orElse(null);
+        if (card == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(card);
+    }
+
+    @Operation(summary = "Mettre à jour une carte", description = "Met à jour les détails d'une carte bancaire existante")
+    @ApiResponse(responseCode = "200", description = "Carte mise à jour avec succès", content = @Content(schema = @Schema(implementation = Card.class)))
+    @ApiResponse(responseCode = "400", description = "Données invalides ou client inexistant")
+    @ApiResponse(responseCode = "404", description = "Carte non trouvée")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateCard(@Parameter(description = "ID de la carte") @PathVariable int id, @RequestBody Card updatedCard) {
+        for (Card card : cards) {
+            if (card.getCardId() == id) {
+                if (customerController.getCustomers().stream().noneMatch(c -> c.getCustomerId() == updatedCard.getCustomerId())) {
+                    return ResponseEntity.badRequest().body("Le client correspondant n'existe pas.");
+                }
+                card.setCustomerId(updatedCard.getCustomerId());
+                card.setCardNumber(updatedCard.getCardNumber());
+                card.setCardType(updatedCard.getCardType());
+                card.setTotalLimit(updatedCard.getTotalLimit());
+                card.setAmountUsed(updatedCard.getAmountUsed());
+                card.setAvailableAmount(updatedCard.getAvailableAmount());
+                card.setCreateDt(updatedCard.getCreateDt());
+                return ResponseEntity.ok(card);
+            }
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @Operation(summary = "Supprimer une carte", description = "Supprime une carte bancaire spécifique")
+    @ApiResponse(responseCode = "200", description = "Carte supprimée avec succès")
+    @ApiResponse(responseCode = "404", description = "Carte non trouvée")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCard(@Parameter(description = "ID de la carte") @PathVariable int id) {
+        boolean removed = cards.removeIf(card -> card.getCardId() == id);
+        if (removed) {
+            return ResponseEntity.ok("Carte supprimée avec succès.");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @Operation(summary = "Supprimer toutes les cartes", description = "Supprime toutes les cartes bancaires")
+    @ApiResponse(responseCode = "200", description = "Toutes les cartes ont été supprimées")
+    @DeleteMapping
+    public ResponseEntity<String> deleteAllCards() {
+        cards.clear();
+        return ResponseEntity.ok("Toutes les cartes ont été supprimées.");
+    }
+
+    // Méthode utilitaire pour CustomerController
+    public List<Card> getCardsByCustomerId(int customerId) {
+        return cards.stream()
+                    .filter(card -> card.getCustomerId() == customerId)
+                    .collect(Collectors.toList());
+    }
+}
+```
+
+---
+
+# **ANCIEN 2 : CustomerController**
+
+```java
+package com.example.demo.controller;
+
+import com.example.demo.model.Customer;
+import com.example.demo.model.Card;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/customers")
+@Tag(name = "Customer", description = "API pour la gestion des clients")
+public class CustomerController {
+
+    private List<Customer> customers = new ArrayList<>();
+    private final CardController cardController;
+
+    public CustomerController(CardController cardController) {
+        this.cardController = cardController;
+    }
+
+    @Operation(summary = "Ajouter un nouveau client", description = "Ajoute un nouveau client dans le système")
+    @ApiResponse(responseCode = "200", description = "Client ajouté avec succès", content = @Content(schema = @Schema(implementation = Customer.class)))
+    @ApiResponse(responseCode = "400", description = "Un client avec cet ID existe déjà")
+    @PostMapping
+    public ResponseEntity<?> addCustomer(@RequestBody Customer customer) {
+        if (customers.stream().anyMatch(c -> c.getCustomerId() == customer.getCustomerId())) {
+            return ResponseEntity.badRequest().body("Un client avec cet ID existe déjà.");
+        }
+        customers.add(customer);
+        return ResponseEntity.ok(customer);
+    }
+
+    @Operation(summary = "Obtenir tous les clients", description = "Récupère la liste de tous les clients")
+    @ApiResponse(responseCode = "200", description = "Liste des clients récupérée avec succès")
+    @GetMapping
+    public List<Customer> getAllCustomers() {
+        return customers;
+    }
+
+    @Operation(summary = "Obtenir un client par ID", description = "Récupère les détails d'un client spécifique")
+    @ApiResponse(responseCode = "200", description = "Client trouvé", content = @Content(schema = @Schema(implementation = Customer.class)))
+    @ApiResponse(responseCode = "404", description = "Client non trouvé")
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCustomerById(@Parameter(description = "ID du client") @PathVariable int id) {
+        Customer customer = customers.stream()
+                        .filter(c -> c.getCustomerId() == id)
+                        .findFirst()
+                        .orElse(null);
+        if (customer == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(customer);
+    }
+
+    @Operation(summary = "Mettre à jour un client", description = "Met à jour les détails d'un client existant")
+    @ApiResponse(responseCode = "200", description = "Client mis à jour avec succès", content = @Content(schema = @Schema(implementation = Customer.class)))
+    @ApiResponse(responseCode = "404", description = "Client non trouvé")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateCustomer(@Parameter(description = "ID du client") @PathVariable int id, @RequestBody Customer updatedCustomer) {
+        for (Customer customer : customers) {
+            if (customer.getCustomerId() == id) {
+                customer.setCustomerLastName(updatedCustomer.getCustomerLastName());
+                customer.setCustomerFirstName(updatedCustomer.getCustomerFirstName());
+                return ResponseEntity.ok(customer);
+            }
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @Operation(summary =
+
+ "Supprimer un client", description = "Supprime un client spécifique s'il n'a pas de cartes associées")
+    @ApiResponse(responseCode = "200", description = "Client supprimé avec succès")
+    @ApiResponse(responseCode = "400", description = "Impossible de supprimer le client car il possède des cartes")
+    @ApiResponse(responseCode = "404", description = "Client non trouvé")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCustomer(@Parameter(description = "ID du client") @PathVariable int id) {
+        List<Card> customerCards = cardController.getCardsByCustomerId(id);
+        if (!customerCards.isEmpty()) {
+            return ResponseEntity.badRequest().body("Impossible de supprimer le client. Il possède encore des cartes.");
+        }
+
+        boolean removed = customers.removeIf(customer -> customer.getCustomerId() == id);
+        if (removed) {
+            return ResponseEntity.ok("Client supprimé avec succès.");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @Operation(summary = "Supprimer tous les clients", description = "Supprime tous les clients s'ils n'ont pas de cartes associées")
+    @ApiResponse(responseCode = "200", description = "Tous les clients ont été supprimés")
+    @ApiResponse(responseCode = "400", description = "Impossible de supprimer tous les clients car certains possèdent des cartes")
+    @DeleteMapping
+    public ResponseEntity<String> deleteAllCustomers() {
+        if (cardController.getAllCards().isEmpty()) {
+            customers.clear();
+            return ResponseEntity.ok("Tous les clients ont été supprimés.");
+        } else {
+            return ResponseEntity.badRequest().body("Impossible de supprimer tous les clients. Certains possèdent encore des cartes.");
+        }
+    }
+
+    // Méthode utilitaire pour CardController
+    public List<Customer> getCustomers() {
+        return customers;
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+--------------------
+# **Annexe 3-2 - Ajout des packages service et exception**
+--------------------
+
+### **Annotations Swagger**
+
+```java
+/* 
+Ces annotations Swagger fournissent une documentation détaillée pour chaque endpoint de l'API des clients, y compris :
+- Une description générale de l'API des clients (@Tag).
+- Des résumés et descriptions pour chaque opération (@Operation).
+- Des détails sur les réponses possibles pour chaque endpoint (@ApiResponse).
+- Des descriptions pour les paramètres de chemin (@Parameter).
+
+Cette documentation permettra aux développeurs d'avoir une meilleure compréhension de votre API et facilitera son utilisation.
+*/
+```
+
+--------------------
+# **Annexe 4 - Ajout des packages service et exception**
+--------------------
+
+Voici les implémentations des services pour **Customer** et **Card**. Ces services implémentent la logique métier et interagissent avec les repositories JPA.
+
+---
+
+1. **CustomerService.java** :
+
+```java
+package com.example.demo.service;
+
+import com.example.demo.model.Customer;
+import com.example.demo.repository.CustomerRepository;
+import com.example.demo.repository.CardRepository;
+import com.example.demo.exception.ResourceNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional
+public class CustomerService {
+
+    private final CustomerRepository customerRepository;
+    private final CardRepository cardRepository;
+
+    @Autowired
+    public CustomerService(CustomerRepository customerRepository, CardRepository cardRepository) {
+        this.customerRepository = customerRepository;
+        this.cardRepository = cardRepository;
+    }
+
+    public Customer createCustomer(Customer customer) {
+        return customerRepository.save(customer);
+    }
+
+    public List<Customer> getAllCustomers() {
+        return customerRepository.findAll();
+    }
+
+    public Optional<Customer> getCustomerById(Long id) {
+        return customerRepository.findById(id);
+    }
+
+    public Customer updateCustomer(Long id, Customer customerDetails) {
+        Customer customer = customerRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + id));
+        
+        customer.setCustomerFirstName(customerDetails.getCustomerFirstName());
+        customer.setCustomerLastName(customerDetails.getCustomerLastName());
+        
+        return customerRepository.save(customer);
+    }
+
+    public void deleteCustomer(Long id) {
+        Customer customer = customerRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + id));
+        
+        if (!customer.getCards().isEmpty()) {
+            throw new IllegalStateException("Cannot delete customer with active cards");
+        }
+        
+        customerRepository.delete(customer);
+    }
+
+    public void deleteAllCustomers() {
+        if (cardRepository.count() > 0) {
+            throw new IllegalStateException("Cannot delete all customers. Some customers have active cards.");
+        }
+        customerRepository.deleteAll();
+    }
+
+    public List<Customer> findCustomersByName(String name) {
+        return customerRepository.findByCustomerLastNameContainingOrCustomerFirstNameContaining(name, name);
+    }
+}
+```
+
+---
+
+2. **CardService.java** :
+
+```java
+package com.example.demo.service;
+
+import com.example.demo.model.Card;
+import com.example.demo.model.Customer;
+import com.example.demo.repository.CardRepository;
+import com.example.demo.repository.CustomerRepository;
+import com.example.demo.exception.ResourceNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional
+public class CardService {
+
+    private final CardRepository cardRepository;
+    private final CustomerRepository customerRepository;
+
+    @Autowired
+    public CardService(CardRepository cardRepository, CustomerRepository customerRepository) {
+        this.cardRepository = cardRepository;
+        this.customerRepository = customerRepository;
+    }
+
+    public Card createCard(Card card, Long customerId) {
+        Customer customer = customerRepository.findById(customerId)
+            .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
+        card.setCustomer(customer);
+        return cardRepository.save(card);
+    }
+
+    public List<Card> getAllCards() {
+        return cardRepository.findAll();
+    }
+
+    public Optional<Card> getCardById(Long id) {
+        return cardRepository.findById(id);
+    }
+
+    public Card updateCard(Long id, Card cardDetails) {
+        Card card = cardRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Card not found with id: " + id));
+        
+        card.setCardNumber(cardDetails.getCardNumber());
+        card.setCardType(cardDetails.getCardType());
+        card.setTotalLimit(cardDetails.getTotalLimit());
+        card.setAmountUsed(cardDetails.getAmountUsed());
+        card.setAvailableAmount(cardDetails.getAvailableAmount());
+        card.setCreateDt(cardDetails.getCreateDt());
+        
+        return cardRepository.save(card);
+    }
+
+    public void deleteCard(Long id) {
+        Card card = cardRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Card not found with id: " + id));
+        cardRepository.delete(card);
+    }
+
+    public void deleteAllCards() {
+        cardRepository.deleteAll();
+    }
+
+    public List<Card> getCardsByCustomerId(Long customerId) {
+        return cardRepository.findByCustomerId(customerId);
+    }
+
+    public Optional<Card> findCardByNumber(String cardNumber) {
+        return cardRepository.findByCardNumber(cardNumber);
+    }
+}
+```
+
+---
+
+Ces services implémentent toutes les opérations CRUD de base, ainsi que quelques méthodes spécifiques. Ils utilisent les repositories JPA pour interagir avec la base de données et gèrent les exceptions pour les ressources non trouvées.
+
+
+
+--------------------
+# **Annexe 5 - Ajout des repositories**
+--------------------
+
+Voici les interfaces repository pour les entités **Customer** et **Card**, qui étendent **JpaRepository** pour bénéficier des méthodes CRUD de base :
+
+1. **CustomerRepository.java** :
+
+```java
+package com.example.demo.repository;
+
+import com.example.demo.model.Customer;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface CustomerRepository extends JpaRepository<Customer, Long> {
+
+    // Recherche des clients par nom (prénom ou nom de famille)
+    List<Customer> findByCustomerLastNameContainingOrCustomerFirstNameContaining(String lastName, String firstName);
+}
+```
+
+---
+
+2. **CardRepository.java** :
+
+```java
+package com.example.demo.repository;
+
+import com.example.demo.model.Card;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface CardRepository extends JpaRepository<Card, Long> {
+
+    // Recherche des cartes par ID du client
+    List<Card> findByCustomerId(Long customerId);
+
+    // Recherche d'une carte par numéro de carte
+    Optional<Card> findByCardNumber(String cardNumber);
+}
+```
+
+Ces interfaces permettent les opérations CRUD de base et incluent des méthodes de recherche personnalisées.
+
+
+--------------------
+# **Annexe 6 - Correction des erreurs**
+--------------------
+
+L'erreur rencontrée concernant la méthode `createCard` dans **CardService**, qui attend deux arguments, se résout en passant correctement l'ID du client. Voici comment procéder :
+
+### Correction du code :
+
+#### **CardService.java** :
+
+```java
+@Service
+@Transactional
+public class CardService {
+
+    private final CardRepository cardRepository;
+    private final CustomerRepository customerRepository;
+
+    @Autowired
+    public CardService(CardRepository cardRepository, CustomerRepository customerRepository) {
+        this.cardRepository = cardRepository;
+        this.customerRepository = customerRepository;
+    }
+
+    public Card createCard(Card card, Long customerId) {
+        Customer customer = customerRepository.findById(customerId)
+            .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+        card.setCustomer(customer);
+        return cardRepository.save(card);
+    }
+}
+```
+
+#### **CardController.java** :
+
+```java
+@RestController
+@RequestMapping("/api/v1/cards")
+@Tag(name = "Card", description = "API pour la gestion des cartes bancaires")
+public class CardController {
+
+    private final CardService cardService;
+
+    @Autowired
+    public CardController(CardService cardService) {
+        this.cardService = cardService;
+    }
+
+    @Operation(summary = "Ajouter une nouvelle carte", description = "Ajoute une nouvelle carte bancaire pour un client existant")
+    @ApiResponse(responseCode = "200", description = "Carte ajoutée avec succès", content = @Content(schema = @Schema(implementation = Card.class)))
+    @ApiResponse(responseCode = "400", description = "Données invalides ou client inexistant")
+    @PostMapping
+    public ResponseEntity<Card> addCard(@RequestBody Card card, @RequestParam Long customerId) {
+        return ResponseEntity.ok(cardService.createCard(card, customerId));
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
